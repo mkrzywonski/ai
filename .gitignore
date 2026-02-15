@@ -4,7 +4,8 @@
 *.env
 !env.example
 
-# Project changelog (created by AI tools, not part of the template)
+# Project state files (created by AI tools per-project, not part of the template)
+TODO.md
 CHANGELOG.md
 
 # Local overrides

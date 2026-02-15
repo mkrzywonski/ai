@@ -37,6 +37,37 @@ If a task requires a new secret (API key, token, password, etc.):
 See `env.example` for the list of expected environment variables and their purposes.
 Run `ai-secrets-check` to see which secrets are currently set.
 
+## Task Tracking (TODO.md)
+
+Maintain a `TODO.md` in the project root to track tasks across sessions and tools.
+The user switches between Claude Code and Codex (and may hit rate limits mid-task),
+so this file is critical for picking up where the last session left off.
+
+- At the **start of a session**, read `TODO.md` (if it exists) and summarize the current state to the user
+- At the **end of a session** or before a natural stopping point, update `TODO.md` with current status
+- If `TODO.md` does not exist, create it when there are tasks worth tracking
+- Keep it in this format:
+  ```markdown
+  # TODO
+
+  ## In Progress
+  - [ ] Task description — brief context on current state and next step
+
+  ## Up Next
+  - [ ] Task description
+  - [ ] Task description
+
+  ## Blocked
+  - [ ] Task description — what's blocking it
+
+  ## Done
+  - [x] Task description (YYYY-MM-DD)
+  ```
+- Move tasks between sections as status changes
+- Include enough context on in-progress tasks that a **different AI tool** could pick up the work
+- When a task is done, move it to Done with the completion date
+- Periodically clean out old Done items to keep the file scannable
+
 ## Changelog
 
 Maintain a `CHANGELOG.md` in the project root to track significant work across sessions.
