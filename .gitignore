@@ -1,0 +1,22 @@
+# Plaintext secrets (should be in secrets.env.gpg instead)
+.env
+.env.*
+*.env
+!env.example
+
+# Local overrides
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/

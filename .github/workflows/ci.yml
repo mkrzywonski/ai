@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          scandir: scripts
+
+  secret-scan:
+    name: Plaintext Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for plaintext secret files
+        run: |
+          FAIL=0
+
+          # Check for unencrypted env/key/credential files
+          for pattern in '*.env' '.env.*' '*.key' '*.pem' '*.p12' 'credentials*'; do
+            matches=$(git ls-files -- "$pattern" 2>/dev/null)
+            if [ -n "$matches" ]; then
+              echo "ERROR: Plaintext secret file committed: $matches"
+              FAIL=1
+            fi
+          done
+
+          # Check for common secret patterns in tracked text files
+          # (skip binary/gpg files)
+          for pattern in \
+            'ghp_[A-Za-z0-9]' \
+            'sk-[A-Za-z0-9]' \
+            'AKIA[A-Z0-9]' \
+            'TOKEN=[^ ]+[A-Za-z0-9]{20}' \
+            'PASSWORD=[^ ]+[A-Za-z0-9]{8}'; do
+            matches=$(git grep -l -E "$pattern" -- ':!*.gpg' ':!env.example' 2>/dev/null || true)
+            if [ -n "$matches" ]; then
+              echo "ERROR: Possible secret found in: $matches (pattern: $pattern)"
+              FAIL=1
+            fi
+          done
+
+          if [ "$FAIL" -eq 1 ]; then
+            echo ""
+            echo "Secrets should be in secrets.env.gpg (encrypted), not in plaintext files."
+            exit 1
+          fi
+
+          echo "No plaintext secrets detected."
