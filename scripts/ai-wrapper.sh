@@ -8,7 +8,7 @@
 # the AI tool. When the tool exits, the subshell exits and secrets are gone.
 # Your main shell never has secrets in its environment.
 
-AI_SECRETS_FILE="${AI_SECRETS_FILE:-$HOME/.secrets/ai.env.gpg}"
+AI_SECRETS_FILE="./secrets.env.gpg"
 
 _ai_load_secrets() {
     if [ ! -f "$AI_SECRETS_FILE" ]; then
@@ -31,8 +31,89 @@ claude() {
 codex() {
     (
         _ai_load_secrets || return 1
+        _ai_sync_codex_mcp
         command codex "$@"
     )
+}
+
+# Ensure Codex has MCP servers from local .mcp.json.
+# This keeps per-project MCP config in one file while Codex stores servers globally.
+_ai_sync_codex_mcp() {
+    local mcp_file=".mcp.json"
+    local entry name transport server_cmd url bearer_env
+    local env_key env_val
+    local -a server_args
+    local -a add_env_opts
+
+    [ -f "$mcp_file" ] || return 0
+
+    if ! command -v jq >/dev/null 2>&1; then
+        echo "WARNING: jq not found; skipping Codex MCP sync from $mcp_file" >&2
+        return 0
+    fi
+
+    while IFS= read -r entry; do
+        name=$(printf '%s' "$entry" | base64 -d | jq -r '.key')
+        transport=$(printf '%s' "$entry" | base64 -d | jq -r '
+            if (.value.command // "") != "" then "stdio"
+            elif (.value.url // "") != "" then "http"
+            else "unknown"
+            end
+        ')
+
+        if command codex mcp get "$name" >/dev/null 2>&1; then
+            continue
+        fi
+
+        if [ "$transport" = "stdio" ]; then
+            server_cmd=$(printf '%s' "$entry" | base64 -d | jq -r '.value.command // empty')
+            if [ -z "$server_cmd" ]; then
+                echo "WARNING: Skipping MCP server '$name' (missing command)" >&2
+                continue
+            fi
+
+            mapfile -t server_args < <(printf '%s' "$entry" | base64 -d | jq -r '.value.args[]?')
+            add_env_opts=()
+            while IFS=$'\t' read -r env_key env_val; do
+                [ -n "$env_key" ] || continue
+                # Claude-style placeholders (e.g. ${NETBOX_URL}) should be inherited from
+                # the current shell, not stored literally in Codex global MCP config.
+                if [[ "$env_val" =~ ^\$\{[A-Za-z_][A-Za-z0-9_]*\}$ ]]; then
+                    continue
+                fi
+                add_env_opts+=(--env "${env_key}=${env_val}")
+            done < <(printf '%s' "$entry" | base64 -d | jq -r '.value.env // {} | to_entries[] | [.key, .value] | @tsv')
+
+            if [ "${#server_args[@]}" -gt 0 ]; then
+                command codex mcp add "$name" "${add_env_opts[@]}" -- "$server_cmd" "${server_args[@]}" >/dev/null 2>&1 \
+                    || echo "WARNING: Failed to add Codex MCP server '$name'" >&2
+            else
+                command codex mcp add "$name" "${add_env_opts[@]}" -- "$server_cmd" >/dev/null 2>&1 \
+                    || echo "WARNING: Failed to add Codex MCP server '$name'" >&2
+            fi
+            continue
+        fi
+
+        if [ "$transport" = "http" ]; then
+            url=$(printf '%s' "$entry" | base64 -d | jq -r '.value.url // empty')
+            bearer_env=$(printf '%s' "$entry" | base64 -d | jq -r '.value.bearerTokenEnvVar // empty')
+            if [ -z "$url" ]; then
+                echo "WARNING: Skipping MCP server '$name' (missing url)" >&2
+                continue
+            fi
+
+            if [ -n "$bearer_env" ]; then
+                command codex mcp add "$name" --url "$url" --bearer-token-env-var "$bearer_env" >/dev/null 2>&1 \
+                    || echo "WARNING: Failed to add Codex MCP server '$name'" >&2
+            else
+                command codex mcp add "$name" --url "$url" >/dev/null 2>&1 \
+                    || echo "WARNING: Failed to add Codex MCP server '$name'" >&2
+            fi
+            continue
+        fi
+
+        echo "WARNING: Skipping MCP server '$name' (unsupported .mcp.json entry)" >&2
+    done < <(jq -r '.mcpServers // {} | to_entries[] | @base64' "$mcp_file")
 }
 
 # Decrypt, open in editor, re-encrypt
