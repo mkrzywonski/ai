@@ -82,7 +82,10 @@ ai-secrets-edit
 
 This opens your editor with the current secrets (or the `env.example` template
 if no secrets file exists yet). Fill in your values, save, and close. The file
-is encrypted to `secrets.env.gpg` automatically.
+is encrypted to `~/.secrets/ai.env.gpg` automatically.
+
+Run `ai-secrets-edit` from the project directory so it picks up `env.example`
+as a starting template.
 
 The plaintext is written to `/dev/shm/` (RAM-backed tmpfs) during editing and
 shredded when done. No plaintext touches disk.
@@ -104,14 +107,14 @@ claude
   └── source ~/ai/scripts/ai-wrapper.sh
         └── claude()  ← wrapper function
               └── ( subshell )
-                    ├── gpg -d secrets.env.gpg → eval (secrets in memory)
+                    ├── gpg -d ~/.secrets/ai.env.gpg → eval (secrets in memory)
                     ├── claude runs (MCP servers inherit env vars)
                     └── subshell exits → secrets gone
 ```
 
-- Secrets live **only** in the AI tool's subshell process
+- Secrets live in `~/.secrets/ai.env.gpg` — shared across all projects
+- Secrets are decrypted **only** into the AI tool's subshell process
 - Your main shell **never** has secrets in its environment
-- `secrets.env.gpg` is committed to git (encrypted, safe to share)
 - Only the GPG private key needs to be transferred between machines
 
 ## Editing Secrets
@@ -138,7 +141,7 @@ After editing, restart the AI tool for changes to take effect.
 
 | File | Committed | Purpose |
 |------|-----------|---------|
-| `secrets.env.gpg` | Yes (encrypted) | GPG-encrypted secrets |
+| `~/.secrets/ai.env.gpg` | No (in home dir) | GPG-encrypted secrets, shared across projects |
 | `env.example` | Yes | Plaintext template showing expected variables |
 | `scripts/ai-wrapper.sh` | Yes | Shell wrapper functions |
 | `AGENTS.md` | Yes | Shared AI instructions (secrets rules, conventions) |

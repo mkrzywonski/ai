@@ -8,7 +8,7 @@
 # the AI tool. When the tool exits, the subshell exits and secrets are gone.
 # Your main shell never has secrets in its environment.
 
-AI_SECRETS_FILE="${AI_SECRETS_FILE:-$HOME/ai/secrets.env.gpg}"
+AI_SECRETS_FILE="${AI_SECRETS_FILE:-$HOME/.secrets/ai.env.gpg}"
 
 _ai_load_secrets() {
     if [ ! -f "$AI_SECRETS_FILE" ]; then
@@ -46,14 +46,13 @@ ai-secrets-edit() {
     if [ -f "$gpg_file" ]; then
         gpg -d -q "$gpg_file" > "$tmp_file" 2>/dev/null
     else
-        # Start from template if it exists
-        local template_dir
-        template_dir="$(dirname "$gpg_file")"
-        if [ -f "$template_dir/env.example" ]; then
-            cp "$template_dir/env.example" "$tmp_file"
+        # Start from template if one exists in current directory
+        if [ -f "env.example" ]; then
+            cp "env.example" "$tmp_file"
         else
             echo "# AI Tool Secrets — fill in values and save" > "$tmp_file"
         fi
+        mkdir -p "$(dirname "$gpg_file")"
     fi
 
     "${EDITOR:-vi}" "$tmp_file"
