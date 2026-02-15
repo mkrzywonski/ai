@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "netbox": {
+      "command": "/opt/netbox-mcp-server/bin/netbox-mcp-server",
+      "env": {
+        "NETBOX_URL": "${NETBOX_URL}",
+        "NETBOX_TOKEN": "${NETBOX_TOKEN}"
+      }
+    }
+  }
+}
