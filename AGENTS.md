@@ -36,3 +36,21 @@ If a task requires a new secret (API key, token, password, etc.):
 
 See `env.example` for the list of expected environment variables and their purposes.
 Run `ai-secrets-check` to see which secrets are currently set.
+
+## Changelog
+
+Maintain a `CHANGELOG.md` in the project root to track significant work across sessions.
+This enables continuity when switching between AI tools or resuming later.
+
+- After completing a significant task or set of changes, add a dated entry to `CHANGELOG.md`
+- If `CHANGELOG.md` does not exist, create it
+- Entries go at the top (reverse chronological order)
+- Format:
+  ```markdown
+  ## YYYY-MM-DD — Brief description
+  - What was done
+  - What was changed
+  - Key decisions made
+  ```
+- Keep entries concise — enough to resume context, not a verbose narrative
+- At the start of a session, read `CHANGELOG.md` (if it exists) to understand recent work

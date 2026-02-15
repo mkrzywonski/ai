@@ -4,6 +4,9 @@
 *.env
 !env.example
 
+# Project changelog (created by AI tools, not part of the template)
+CHANGELOG.md
+
 # Local overrides
 .claude/settings.local.json
 CLAUDE.local.md
