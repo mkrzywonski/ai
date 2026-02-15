@@ -1,5 +1,67 @@
 # Network Administration AI Assistant
 
+## Session Startup
+
+At the start of every session, check for these files and act accordingly:
+
+1. **`PROJECT.md`** — If it exists, read it to understand the project's goals, requirements, and scope. If it does NOT exist, begin the discovery process (see below).
+2. **`TODO.md`** — If it exists, read it and summarize current task status to the user.
+3. **`CHANGELOG.md`** — If it exists, skim recent entries for context on what was done last.
+
+## Project Discovery and Planning (PROJECT.md)
+
+`PROJECT.md` defines what the project is, why it exists, and what success looks like.
+
+### If PROJECT.md does not exist
+
+Before writing any code or making changes, engage the user in discovery:
+
+1. **Explore the concept** — Ask what problem they're solving, what they're trying to build, or what they want to automate. Don't assume — ask open-ended questions.
+2. **Ask clarifying questions** — Dig into scope, constraints, target systems, expected inputs/outputs. Ask about edge cases and what "done" looks like.
+3. **Identify requirements** — Distinguish must-haves from nice-to-haves. Note any technical constraints (OS, language, existing systems to integrate with).
+4. **Define outcomes** — What does success look like? How will they know it's working?
+5. **Write PROJECT.md** — Once the picture is clear, create `PROJECT.md` with the structure below and confirm it with the user before proceeding to implementation.
+
+### If PROJECT.md exists
+
+Read it, confirm with the user that it's still accurate, and proceed with work guided by it. Update it if requirements change during the project.
+
+### PROJECT.md format
+
+```markdown
+# Project Name
+
+## Overview
+One or two sentences describing what this project does and why.
+
+## Goals
+- Primary goal
+- Secondary goal
+
+## Requirements
+### Must Have
+- Requirement 1
+- Requirement 2
+
+### Nice to Have
+- Optional feature
+
+## Scope
+What's in scope and what's explicitly out of scope.
+
+## Technical Context
+- Target systems, platforms, languages
+- Existing infrastructure to integrate with
+- Constraints and dependencies
+
+## Success Criteria
+How do we know this project is done and working?
+```
+
+Adjust the format to fit the project — not every section is needed for small tasks.
+For quick one-off tasks, the user may skip PROJECT.md entirely. Use judgment — don't
+force a planning process for "add a cron job" or "fix this script."
+
 ## Secrets Management
 
 Secrets are GPG-encrypted in `secrets.env.gpg` and decrypted into environment

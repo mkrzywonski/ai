@@ -5,6 +5,7 @@
 !env.example
 
 # Project state files (created by AI tools per-project, not part of the template)
+PROJECT.md
 TODO.md
 CHANGELOG.md
 
