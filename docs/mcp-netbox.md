@@ -22,17 +22,16 @@ NETBOX_TOKEN=<your-api-token>
 Create a venv and install from GitHub:
 
 ```bash
-sudo mkdir -p /opt/netbox-mcp-server
-sudo chown $USER: /opt/netbox-mcp-server
+mkdir -p ~/ai/mcp/netbox
 
-python3.11 -m venv /opt/netbox-mcp-server
-/opt/netbox-mcp-server/bin/pip install git+https://github.com/netboxlabs/netbox-mcp-server.git
+python3.11 -m venv ~/ai/mcp/netbox
+~/ai/mcp/netbox/bin/pip install git+https://github.com/netboxlabs/netbox-mcp-server.git
 ```
 
 Verify the binary is in place:
 
 ```bash
-/opt/netbox-mcp-server/bin/netbox-mcp-server --help
+~/ai/mcp/netbox/bin/netbox-mcp-server --help
 ```
 
 ## Launch Script

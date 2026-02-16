@@ -9,6 +9,9 @@ PROJECT.md
 TODO.md
 CHANGELOG.md
 
+# MCP server binaries and venvs (rebuilt per system)
+mcp/
+
 # Local overrides
 .claude/settings.local.json
 CLAUDE.local.md

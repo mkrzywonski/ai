@@ -33,6 +33,7 @@ This gives you:
 | `codex` | Decrypts secrets into a subshell, runs Codex CLI |
 | `ai-secrets-edit` | Decrypt, edit, and re-encrypt secrets |
 | `ai-secrets-check` | Show which secrets are set (without showing values) |
+| `ai-init` | Set up current directory with AI config symlinks |
 
 ### 3. Generate a GPG keypair
 
@@ -137,6 +138,22 @@ After editing, restart the AI tool for changes to take effect.
 4. Run `ai-secrets-check` to verify
 5. Done — `claude` and `codex` commands will decrypt secrets on the fly
 
+## Starting a New Project
+
+From any directory:
+
+```bash
+mkdir ~/projects/new-thing && cd ~/projects/new-thing
+git init
+ai-init
+```
+
+This creates symlinks to the shared AI config in `~/ai` and seeds a `.gitignore`.
+Start `claude` or `codex` and the AI will walk you through creating a `PROJECT.md`.
+
+The symlinked files (AGENTS.md, CLAUDE.md, .mcp.json) are gitignored in the new
+project so they don't get committed — they always point back to `~/ai`.
+
 ## MCP Servers
 
 MCP (Model Context Protocol) servers give AI tools direct API access to your
@@ -147,8 +164,8 @@ to Codex automatically by the wrapper script.
 
 | Server | Source | Install Location | Setup Guide |
 |--------|--------|-----------------|-------------|
-| NetBox | [netboxlabs/netbox-mcp-server](https://github.com/netboxlabs/netbox-mcp-server) | `/opt/netbox-mcp-server/` (Python venv) | [docs/mcp-netbox.md](docs/mcp-netbox.md) |
-| Grafana | [grafana/mcp-grafana](https://github.com/grafana/mcp-grafana) | `/opt/mcp-grafana/` (Go binary) | [docs/mcp-grafana.md](docs/mcp-grafana.md) |
+| NetBox | [netboxlabs/netbox-mcp-server](https://github.com/netboxlabs/netbox-mcp-server) | `~/ai/mcp/netbox/` (Python venv) | [docs/mcp-netbox.md](docs/mcp-netbox.md) |
+| Grafana | [grafana/mcp-grafana](https://github.com/grafana/mcp-grafana) | `~/ai/mcp/grafana/` (Go binary) | [docs/mcp-grafana.md](docs/mcp-grafana.md) |
 
 ### Planned / Not Yet Installed
 

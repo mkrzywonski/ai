@@ -156,6 +156,66 @@ ai-secrets-edit() {
     fi
 }
 
+# Initialize a project directory with AI config symlinks
+ai-init() {
+    local ai_home="${AI_HOME:-$HOME/ai}"
+
+    if [ ! -d "$ai_home" ]; then
+        echo "ERROR: AI home not found: $ai_home" >&2
+        echo "Set AI_HOME or clone the repo to ~/ai" >&2
+        return 1
+    fi
+
+    # Don't run from inside ~/ai itself
+    if [ "$(cd "$ai_home" && pwd)" = "$(pwd)" ]; then
+        echo "ERROR: Already in $ai_home — ai-init is for project directories" >&2
+        return 1
+    fi
+
+    # Symlink shared config
+    local symlinks=(AGENTS.md CLAUDE.md .mcp.json)
+    for f in "${symlinks[@]}"; do
+        if [ -e "$f" ] || [ -L "$f" ]; then
+            echo "  SKIP   $f (already exists)"
+        else
+            ln -s "$ai_home/$f" "$f"
+            echo "  LINK   $f -> $ai_home/$f"
+        fi
+    done
+
+    # Copy .gitignore seed (project will customize)
+    if [ -e ".gitignore" ]; then
+        echo "  SKIP   .gitignore (already exists)"
+    else
+        cat > .gitignore <<'GITIGNORE'
+# AI tool files (created per-session, not part of project source)
+PROJECT.md
+TODO.md
+CHANGELOG.md
+
+# Symlinks to ~/ai (don't commit these)
+AGENTS.md
+CLAUDE.md
+.mcp.json
+
+# Secrets
+.env
+.env.*
+*.env
+*.env.gpg
+
+# Local overrides
+.claude/
+CLAUDE.local.md
+GITIGNORE
+        echo "  CREATE .gitignore (with AI ignores — add your own)"
+    fi
+
+    echo ""
+    echo "Done. AI config linked from $ai_home"
+    echo "Start 'claude' or 'codex' in this directory to begin."
+}
+
 # Check which secrets are set (without showing values)
 ai-secrets-check() {
     (

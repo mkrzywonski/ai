@@ -8,6 +8,13 @@ At the start of every session, check for these files and act accordingly:
 2. **`TODO.md`** — If it exists, read it and summarize current task status to the user.
 3. **`CHANGELOG.md`** — If it exists, skim recent entries for context on what was done last.
 
+## Shared Config (Symlinks)
+
+In project directories set up with `ai-init`, AGENTS.md, CLAUDE.md, and
+.mcp.json are **symlinks** to `~/ai`. Do NOT edit these files from a project
+directory — changes would affect all projects. If a project needs custom AI
+instructions, add them to `CLAUDE.local.md` in the project directory.
+
 ## Project Discovery and Planning (PROJECT.md)
 
 `PROJECT.md` defines what the project is, why it exists, and what success looks like.

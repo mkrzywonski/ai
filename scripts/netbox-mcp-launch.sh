@@ -21,4 +21,4 @@ set -a
 eval "$(gpg -d -q "$secrets_file" 2>/dev/null)"
 set +a
 
-exec /opt/netbox-mcp-server/bin/netbox-mcp-server "$@"
+exec "$HOME/ai/mcp/netbox/bin/netbox-mcp-server" "$@"

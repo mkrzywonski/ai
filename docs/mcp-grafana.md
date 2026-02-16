@@ -22,20 +22,19 @@ GRAFANA_API_KEY=<your-service-account-token>
 Download the prebuilt binary from GitHub releases:
 
 ```bash
-sudo mkdir -p /opt/mcp-grafana
-sudo chown $USER: /opt/mcp-grafana
+mkdir -p ~/ai/mcp/grafana
 
 # Check https://github.com/grafana/mcp-grafana/releases for latest version
 VERSION=v0.10.0
 curl -L "https://github.com/grafana/mcp-grafana/releases/download/${VERSION}/mcp-grafana_linux_amd64.tar.gz" \
-  | tar xz -C /opt/mcp-grafana
-chmod +x /opt/mcp-grafana/mcp-grafana
+  | tar xz -C ~/ai/mcp/grafana
+chmod +x ~/ai/mcp/grafana/mcp-grafana
 ```
 
 Verify:
 
 ```bash
-/opt/mcp-grafana/mcp-grafana --version
+~/ai/mcp/grafana/mcp-grafana --version
 ```
 
 ## Claude Code Configuration (`.mcp.json`)
@@ -43,7 +42,7 @@ Verify:
 ```json
 {
   "grafana": {
-    "command": "/opt/mcp-grafana/mcp-grafana",
+    "command": "~/ai/mcp/grafana/mcp-grafana",
     "env": {
       "GRAFANA_URL": "${GRAFANA_URL}",
       "GRAFANA_API_KEY": "${GRAFANA_API_KEY}"
