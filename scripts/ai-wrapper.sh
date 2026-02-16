@@ -8,7 +8,17 @@
 # the AI tool. When the tool exits, the subshell exits and secrets are gone.
 # Your main shell never has secrets in its environment.
 
-AI_SECRETS_FILE="./secrets.env.gpg"
+# Secrets file selection (in priority order):
+# 1) Explicit AI_SECRETS_FILE env override
+# 2) Project-local secrets file for this repo
+# 3) Shared per-user secrets file in ~/.secrets
+if [ -z "${AI_SECRETS_FILE:-}" ]; then
+    if [ -f "./secrets.env.gpg" ]; then
+        AI_SECRETS_FILE="./secrets.env.gpg"
+    else
+        AI_SECRETS_FILE="$HOME/.secrets/ai.env.gpg"
+    fi
+fi
 
 _ai_load_secrets() {
     if [ ! -f "$AI_SECRETS_FILE" ]; then
