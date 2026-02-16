@@ -8,7 +8,7 @@ if [ -z "$secrets_file" ]; then
     if [ -f "/home/netops/ai/secrets.env.gpg" ]; then
         secrets_file="/home/netops/ai/secrets.env.gpg"
     else
-        secrets_file="$HOME/.secrets/ai.env.gpg"
+        secrets_file="$HOME/.secrets/secrets.env.gpg"
     fi
 fi
 

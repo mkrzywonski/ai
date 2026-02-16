@@ -82,7 +82,7 @@ ai-secrets-edit
 
 This opens your editor with the current secrets (or the `env.example` template
 if no secrets file exists yet). Fill in your values, save, and close. The file
-is encrypted to `~/.secrets/ai.env.gpg` automatically.
+is encrypted to `~/.secrets/secrets.env.gpg` automatically.
 
 Run `ai-secrets-edit` from the project directory so it picks up `env.example`
 as a starting template.
@@ -107,12 +107,12 @@ claude
   └── source ~/ai/scripts/ai-wrapper.sh
         └── claude()  ← wrapper function
               └── ( subshell )
-                    ├── gpg -d ~/.secrets/ai.env.gpg → eval (secrets in memory)
+                    ├── gpg -d ~/.secrets/secrets.env.gpg → eval (secrets in memory)
                     ├── claude runs (MCP servers inherit env vars)
                     └── subshell exits → secrets gone
 ```
 
-- Secrets live in `~/.secrets/ai.env.gpg` — shared across all projects
+- Secrets live in `~/.secrets/secrets.env.gpg` — shared across all projects
 - Secrets are decrypted **only** into the AI tool's subshell process
 - Your main shell **never** has secrets in its environment
 - Only the GPG private key needs to be transferred between machines
@@ -137,12 +137,52 @@ After editing, restart the AI tool for changes to take effect.
 4. Run `ai-secrets-check` to verify
 5. Done — `claude` and `codex` commands will decrypt secrets on the fly
 
+## MCP Servers
+
+MCP (Model Context Protocol) servers give AI tools direct API access to your
+infrastructure. They are configured in `.mcp.json` for Claude Code and synced
+to Codex automatically by the wrapper script.
+
+### Installed
+
+| Server | Source | Install Location | Setup Guide |
+|--------|--------|-----------------|-------------|
+| NetBox | [netboxlabs/netbox-mcp-server](https://github.com/netboxlabs/netbox-mcp-server) | `/opt/netbox-mcp-server/` (Python venv) | [docs/mcp-netbox.md](docs/mcp-netbox.md) |
+| Grafana | [grafana/mcp-grafana](https://github.com/grafana/mcp-grafana) | `/opt/mcp-grafana/` (Go binary) | [docs/mcp-grafana.md](docs/mcp-grafana.md) |
+
+### Planned / Not Yet Installed
+
+| Server | Notes |
+|--------|-------|
+| InfluxDB v1 | [GreenScreen410/influxdb-v1-mcp](https://github.com/GreenScreen410/influxdb-v1-mcp) — Python, needs local clone |
+| Juniper | [Juniper/junos-mcp-server](https://github.com/Juniper/junos-mcp-server) — Python, needs `devices.json` config |
+| GitHub | [@github/mcp-server](https://github.com/github/github-mcp-server) — via npx |
+
+### No MCP Server Available
+
+These are queried via `curl` or SSH, documented in `AGENTS.md`:
+
+- **SolarWinds Orion** — REST API with SWQL queries
+- **Ruckus SmartZone** — REST API
+- **Cisco** — SSH
+
+### Adding a New MCP Server
+
+1. Install the server binary/package (see individual setup guides)
+2. Add an entry to `.mcp.json` with `${VAR}` references for secrets
+3. Add the required env vars to `env.example` (names only, no values)
+4. Run `ai-secrets-edit` to add the actual secret values
+5. Restart the AI tool
+6. Create a setup guide in `docs/mcp-<name>.md`
+
 ## File Reference
 
 | File | Committed | Purpose |
 |------|-----------|---------|
-| `~/.secrets/ai.env.gpg` | No (in home dir) | GPG-encrypted secrets, shared across projects |
+| `~/.secrets/secrets.env.gpg` | No (in home dir) | GPG-encrypted secrets, shared across projects |
 | `env.example` | Yes | Plaintext template showing expected variables |
 | `scripts/ai-wrapper.sh` | Yes | Shell wrapper functions |
 | `AGENTS.md` | Yes | Shared AI instructions (secrets rules, conventions) |
 | `CLAUDE.md` | Yes | Claude-specific config (imports AGENTS.md) |
+| `.mcp.json` | Yes | MCP server definitions for Claude Code |
+| `docs/mcp-*.md` | Yes | Per-server installation and setup guides |

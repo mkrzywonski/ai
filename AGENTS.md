@@ -64,7 +64,7 @@ force a planning process for "add a cron job" or "fix this script."
 
 ## Secrets Management
 
-Secrets are GPG-encrypted in `~/.secrets/ai.env.gpg` and decrypted into
+Secrets are GPG-encrypted in `~/.secrets/secrets.env.gpg` and decrypted into
 environment variables only within the AI tool's subshell. They are NOT in
 the user's normal shell environment. The secrets file is shared across all
 projects — it lives in the home directory, not in the project.

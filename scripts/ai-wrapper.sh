@@ -16,7 +16,7 @@ if [ -z "${AI_SECRETS_FILE:-}" ]; then
     if [ -f "./secrets.env.gpg" ]; then
         AI_SECRETS_FILE="./secrets.env.gpg"
     else
-        AI_SECRETS_FILE="$HOME/.secrets/ai.env.gpg"
+        AI_SECRETS_FILE="$HOME/.secrets/secrets.env.gpg"
     fi
 fi
 
