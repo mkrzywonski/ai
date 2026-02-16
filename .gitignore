@@ -9,6 +9,9 @@ PROJECT.md
 TODO.md
 CHANGELOG.md
 
+# Generated MCP config (built from mcp-servers.json by the wrapper)
+.mcp.json
+
 # MCP server binaries and venvs (rebuilt per system)
 mcp/
 

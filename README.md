@@ -151,14 +151,19 @@ ai-init
 This creates symlinks to the shared AI config in `~/ai` and seeds a `.gitignore`.
 Start `claude` or `codex` and the AI will walk you through creating a `PROJECT.md`.
 
-The symlinked files (AGENTS.md, CLAUDE.md, .mcp.json) are gitignored in the new
-project so they don't get committed — they always point back to `~/ai`.
+The symlinked files (AGENTS.md, CLAUDE.md, mcp-servers.json) are gitignored in
+the new project. `.mcp.json` is generated from `mcp-servers.json` with `${HOME}`
+expanded to absolute paths (required by Claude Code).
 
 ## MCP Servers
 
 MCP (Model Context Protocol) servers give AI tools direct API access to your
-infrastructure. They are configured in `.mcp.json` for Claude Code and synced
-to Codex automatically by the wrapper script.
+infrastructure.
+
+Server definitions live in **`mcp-servers.json`** (committed, portable). The
+`claude` and `codex` wrapper functions generate `.mcp.json` from it at launch
+by expanding `${HOME}` to absolute paths. Both wrappers read from the same
+source file.
 
 ### Installed
 
@@ -185,11 +190,11 @@ These are queried via `curl` or SSH, documented in `AGENTS.md`:
 
 ### Adding a New MCP Server
 
-1. Install the server binary/package (see individual setup guides)
-2. Add an entry to `.mcp.json` with `${VAR}` references for secrets
+1. Install the server binary/package into `~/ai/mcp/<name>/`
+2. Add an entry to `mcp-servers.json` — use `${HOME}` for paths, `${VAR}` for secrets
 3. Add the required env vars to `env.example` (names only, no values)
 4. Run `ai-secrets-edit` to add the actual secret values
-5. Restart the AI tool
+5. Restart the AI tool (the wrapper regenerates `.mcp.json` on each launch)
 6. Create a setup guide in `docs/mcp-<name>.md`
 
 ## File Reference
@@ -201,5 +206,6 @@ These are queried via `curl` or SSH, documented in `AGENTS.md`:
 | `scripts/ai-wrapper.sh` | Yes | Shell wrapper functions |
 | `AGENTS.md` | Yes | Shared AI instructions (secrets rules, conventions) |
 | `CLAUDE.md` | Yes | Claude-specific config (imports AGENTS.md) |
-| `.mcp.json` | Yes | MCP server definitions for Claude Code |
+| `mcp-servers.json` | Yes | Portable MCP server definitions (uses `${HOME}`) |
+| `.mcp.json` | No (generated) | Claude Code MCP config (generated from mcp-servers.json) |
 | `docs/mcp-*.md` | Yes | Per-server installation and setup guides |

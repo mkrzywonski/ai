@@ -37,12 +37,12 @@ Verify:
 ~/ai/mcp/grafana/mcp-grafana --version
 ```
 
-## Claude Code Configuration (`.mcp.json`)
+## MCP Server Configuration (`mcp-servers.json`)
 
 ```json
 {
   "grafana": {
-    "command": "~/ai/mcp/grafana/mcp-grafana",
+    "command": "${HOME}/ai/mcp/grafana/mcp-grafana",
     "env": {
       "GRAFANA_URL": "${GRAFANA_URL}",
       "GRAFANA_API_KEY": "${GRAFANA_API_KEY}"
@@ -50,6 +50,9 @@ Verify:
   }
 }
 ```
+
+The `claude` and `codex` wrappers expand `${HOME}` and generate `.mcp.json`
+automatically at launch.
 
 ## Verify
 

@@ -8,6 +8,9 @@
 # the AI tool. When the tool exits, the subshell exits and secrets are gone.
 # Your main shell never has secrets in its environment.
 
+# AI home directory (where this repo is cloned)
+AI_HOME="${AI_HOME:-$HOME/ai}"
+
 # Secrets file selection (in priority order):
 # 1) Explicit AI_SECRETS_FILE env override
 # 2) Project-local secrets file for this repo
@@ -31,9 +34,34 @@ _ai_load_secrets() {
     set +a
 }
 
+# Generate .mcp.json from mcp-servers.json by expanding ${HOME} in command paths.
+# Claude Code needs absolute paths in .mcp.json but we commit portable paths
+# in mcp-servers.json with ${HOME} placeholders.
+_ai_generate_mcp_json() {
+    local src="${1:-mcp-servers.json}"
+    local dst="${2:-.mcp.json}"
+
+    # Find the source file: check current dir, then follow symlink, then AI_HOME
+    if [ -f "$src" ]; then
+        : # use it
+    elif [ -L "$src" ] && [ -f "$(readlink "$src")" ]; then
+        src="$(readlink "$src")"
+    elif [ -f "$AI_HOME/$src" ]; then
+        src="$AI_HOME/$src"
+    else
+        echo "WARNING: $src not found; skipping .mcp.json generation" >&2
+        return 0
+    fi
+
+    # Expand ${HOME} (and only ${HOME}) in command/args paths.
+    # Leave ${VAR} env references untouched — Claude expands those at runtime.
+    sed "s|\${HOME}|$HOME|g" "$src" > "$dst"
+}
+
 claude() {
     (
         _ai_load_secrets || return 1
+        _ai_generate_mcp_json
         command claude "$@"
     )
 }
@@ -41,12 +69,13 @@ claude() {
 codex() {
     (
         _ai_load_secrets || return 1
+        _ai_generate_mcp_json
         _ai_sync_codex_mcp
         command codex "$@"
     )
 }
 
-# Ensure Codex has MCP servers from local .mcp.json.
+# Ensure Codex has MCP servers from the generated .mcp.json.
 # This keeps per-project MCP config in one file while Codex stores servers globally.
 _ai_sync_codex_mcp() {
     local mcp_file=".mcp.json"
@@ -173,7 +202,7 @@ ai-init() {
     fi
 
     # Symlink shared config
-    local symlinks=(AGENTS.md CLAUDE.md .mcp.json)
+    local symlinks=(AGENTS.md CLAUDE.md mcp-servers.json)
     for f in "${symlinks[@]}"; do
         if [ -e "$f" ] || [ -L "$f" ]; then
             echo "  SKIP   $f (already exists)"
@@ -182,6 +211,14 @@ ai-init() {
             echo "  LINK   $f -> $ai_home/$f"
         fi
     done
+
+    # Generate .mcp.json from the template
+    if [ -e ".mcp.json" ]; then
+        echo "  SKIP   .mcp.json (already exists)"
+    else
+        _ai_generate_mcp_json "$ai_home/mcp-servers.json" ".mcp.json"
+        echo "  CREATE .mcp.json (generated from mcp-servers.json)"
+    fi
 
     # Copy .gitignore seed (project will customize)
     if [ -e ".gitignore" ]; then
@@ -196,6 +233,9 @@ CHANGELOG.md
 # Symlinks to ~/ai (don't commit these)
 AGENTS.md
 CLAUDE.md
+mcp-servers.json
+
+# Generated MCP config
 .mcp.json
 
 # Secrets

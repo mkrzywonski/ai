@@ -43,17 +43,18 @@ handles decrypting secrets before exec'ing the server.
 The launch script lives at `scripts/netbox-mcp-launch.sh` and is referenced
 in `.mcp.json`.
 
-## Claude Code Configuration (`.mcp.json`)
+## MCP Server Configuration (`mcp-servers.json`)
 
 ```json
 {
   "netbox": {
-    "command": "/path/to/ai/scripts/netbox-mcp-launch.sh"
+    "command": "${HOME}/ai/scripts/netbox-mcp-launch.sh"
   }
 }
 ```
 
-Update the path in `.mcp.json` to match your clone location.
+The `claude` and `codex` wrappers expand `${HOME}` and generate `.mcp.json`
+automatically at launch.
 
 ## Verify
 
