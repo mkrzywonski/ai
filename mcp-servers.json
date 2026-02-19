@@ -3,6 +3,10 @@
     "netbox": {
       "command": "${HOME}/ai/scripts/netbox-mcp-launch.sh"
     },
+    "tmux-mcp": {
+      "command": "python3",
+      "args": ["${HOME}/ai/mcp/tmux-mcp/mcp_server.py"]
+    },
     "grafana": {
       "command": "${HOME}/ai/mcp/grafana/mcp-grafana",
       "env": {
